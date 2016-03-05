@@ -11,17 +11,31 @@ class MoviesController < ApplicationController
   end
 
   def index
+    @all_ratings = Movie.all_ratings
+    @ratings     = params[:ratings]
+    
     if !session.has_key?(:ratings)
       session[:ratings]=Movie.all_ratings
     end
     
-    if params.has_key?(:ratings) and !params[:ratings].nil? and params[:ratings].keys.length > 0
-    session[:ratings]=params[:ratings].keys
+    if (params[:sort_by] or session[:sort_by]) == 'title'
+      @title_header = 'hilite'
+    elsif (params[:sort_by] or session[:sort_by]) == 'release_date'
+      @release_date_header ='hilite'
     end
     
-    @movies = Movie.where(rating: session[:ratings]).order(params[:sort_by])
-    @all_ratings = Movie.all_ratings
+    if params.has_key?(:ratings) and !@ratings.nil? and @ratings.keys.length > 0
+    session[:ratings]=params[:ratings].keys
+    
+    end
+    
+    if params.has_key?(:sort_by)
+      session[:sort_by]=params[:sort_by]
+    end
+    @movies = Movie.where(rating: session[:ratings]).order(session[:sort_by])
+    
   end
+
 
   def new
     # default: render 'new' template
